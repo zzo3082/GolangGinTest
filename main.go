@@ -1,6 +1,7 @@
 package main
 
 import (
+	"GolangAPI/database"
 	. "GolangAPI/src"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,11 @@ func main() {
 
 	// 3. Simple Router
 	AddSimpleRouter(v1)
+
+	// 4. 連資料庫
+	go func() {
+		database.DBConnect()
+	}()
 
 	router.Run(":8080") // Start the server on port 8080
 }

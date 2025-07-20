@@ -14,7 +14,25 @@ var userList = []model.User{}
 
 // Get User
 func FindAllUsers(c *gin.Context) {
-	c.JSON(http.StatusOK, userList)
+	// c.JSON(http.StatusOK, userList)
+	// 從 db 撈 users 出來
+	users := model.FindAllUsers()
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, "error : No users found.")
+		return
+	}
+	c.JSON(http.StatusOK, users)
+}
+
+// Get User by ID
+func FindByUserId(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Param("id"))
+	user := model.FindByUserId(userId)
+	if user.ID == 0 {
+		c.JSON(http.StatusNotFound, "error : User not found.")
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
 // Post User
