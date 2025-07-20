@@ -12,5 +12,14 @@ func main() {
 			"MESSAGE": "pong",
 		})
 	})
+
+	// Define a POST endpoint with a path parameter id
+	router.POST("/ping/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		c.JSON(200, gin.H{
+			"PostId": id,
+		})
+	})
+
 	router.Run(":8080") // Start the server on port 8080
 }
