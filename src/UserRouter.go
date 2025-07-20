@@ -11,4 +11,6 @@ func AddUserRouter(router *gin.RouterGroup) {
 
 	user.GET("/", services.FindAllUsers)
 	user.POST("/", services.PostUser)
+	user.DELETE("/:id", services.DeleteUser)
+	user.PUT("/:id", services.PutUser)
 }
