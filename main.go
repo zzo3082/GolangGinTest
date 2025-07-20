@@ -2,7 +2,7 @@ package main
 
 import (
 	"GolangAPI/database"
-	. "GolangAPI/src"
+	. "GolangAPI/handler"
 
 	"github.com/gin-gonic/gin"
 )

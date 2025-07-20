@@ -2,7 +2,7 @@ package services
 
 import (
 	model "GolangAPI/models"
-	"log"
+	repository "GolangAPI/repository"
 	"net/http"
 	"strconv"
 
@@ -10,13 +10,13 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var userList = []model.User{}
+// 寫 User 邏輯操作的檔案, 驗證輸入 回傳
 
 // Get User
 func FindAllUsers(c *gin.Context) {
 	// c.JSON(http.StatusOK, userList)
 	// 從 db 撈 users 出來
-	users := model.FindAllUsers()
+	users := repository.FindAllUsers()
 	if len(users) == 0 {
 		c.JSON(http.StatusNotFound, "error : No users found.")
 		return
@@ -27,7 +27,7 @@ func FindAllUsers(c *gin.Context) {
 // Get User by ID
 func FindByUserId(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Param("id"))
-	user := model.FindByUserId(userId)
+	user := repository.FindByUserId(userId)
 	if user.ID == 0 {
 		c.JSON(http.StatusNotFound, "error : User not found.")
 		return
@@ -58,29 +58,22 @@ func PostUser(c *gin.Context) {
 		}
 	}
 
-	userList = append(userList, user)
-	c.JSON(http.StatusOK, "message : PostUser Successed.")
-
+	insertedUser := repository.CreateUser(user)
+	c.JSON(http.StatusOK, insertedUser)
 }
 
 // Delete User
 func DeleteUser(c *gin.Context) {
-	userIdStr := c.Param("id") // 這個撈出來是 string
-	// 用 strconv.Atoi 轉成 int, 失敗會有error 所以前面要多一個 err 去接收, 不要的話可以用 _ 代替
-	userId, _ := strconv.Atoi(userIdStr)
-	for _, user := range userList {
-		log.Println(user)
-		if user.ID == userId {
-			userList = append(userList[:userId-1], userList[userId:]...)
-			c.JSON(http.StatusOK, "message : DeleteUser Successed.")
-			return
-		}
+	userId, _ := strconv.Atoi(c.Param("id"))
+	isDeleted := repository.DeleteUser(userId)
+	if !isDeleted {
+		c.JSON(http.StatusNotFound, "error : User not found.")
+		return
 	}
-
-	c.JSON(http.StatusNotFound, "error : User not found.")
+	c.JSON(http.StatusOK, "message : DeleteUser Successed.")
 }
 
-// Put User
+// Update User
 func PutUser(c *gin.Context) {
 	updateUser := model.User{}
 	err := c.BindJSON(&updateUser)
@@ -88,15 +81,10 @@ func PutUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "error : "+err.Error())
 		return
 	}
-	userId, _ := strconv.Atoi(c.Param("id"))
-	for index, user := range userList {
-		if user.ID == userId {
-			// 更新用戶資料
-			userList[index] = updateUser
-			log.Println("Updated User:", userList[index])
-			c.JSON(http.StatusOK, "message : PutUser Successed.")
-			return
-		}
+	updateUser = repository.UpdateUser(updateUser.ID, updateUser)
+	if updateUser.ID == 0 {
+		c.JSON(http.StatusNotFound, "error : User not found.")
+		return
 	}
-	c.JSON(http.StatusNotFound, "error : User not found.")
+	c.JSON(http.StatusOK, "message : UpdateUser Successed. UserId: "+strconv.Itoa(updateUser.ID))
 }

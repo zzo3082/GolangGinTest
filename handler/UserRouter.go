@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 管理 User 路由的檔案
+
 func AddUserRouter(router *gin.RouterGroup) {
 	user := router.Group("/user")
 
