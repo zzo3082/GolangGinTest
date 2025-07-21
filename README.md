@@ -49,8 +49,15 @@
 - `GET /v1/user/`         取得所有使用者
 - `GET /v1/user/:id`      取得指定使用者
 - `POST /v1/user/`        新增使用者
+- `POST /v1/user/batch`   批量新增使用者
 - `DELETE /v1/user/:id`   刪除使用者
 - `PUT /v1/user/:id`      更新使用者
+
+## 批量 insert db
+在 `UserRepository.go` 內有兩種方法
+1. `CreateUsersBatch` > 使用 `gorm` 內建的 Create + batch
+2. `CreateUsersBulk` > 直接寫 `sql` 指令, 減少gorm mapping 欄位 > 適合大量級資料 insert
+
 ---
 
 如需更多說明請參考各資料夾內程式碼。
