@@ -1,7 +1,10 @@
 package src
 
 import (
+	redisCache "GolangAPI/middlewares"
 	sessions "GolangAPI/middlewares"
+	model "GolangAPI/models"
+	Repository "GolangAPI/repository"
 	"GolangAPI/services"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +17,8 @@ func AddUserRouter(router *gin.RouterGroup) {
 	user := router.Group("/user", sessions.SetSession())
 
 	user.GET("/", services.FindAllUsers)
-	user.GET("/:id", services.FindByUserId)
+	//user.GET("/:id", services.FindByUserId)
+	user.GET("/:id", redisCache.CacheOneUserDecorator(Repository.RedisOneUser, "id", "user:%s", model.User{}))
 	user.POST("/", services.PostUser)
 	user.POST("/batch", services.PostUsers) // 批量新增用戶
 	user.PUT("/:id", services.PutUser)
