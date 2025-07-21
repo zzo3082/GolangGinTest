@@ -103,3 +103,13 @@ func CreateUsersTransaction(users []User) error {
 
 	return tx.Commit().Error
 }
+
+// CheckUserPassword
+func CheckUserPassword(username, password string) (User, error) {
+	var user User
+	err := database.DBConn.Where("name = ? AND password = ?", username, password).First(&user).Error
+	if err != nil {
+		return User{}, err // 如果找不到使用者，回傳錯誤
+	}
+	return user, nil // 找到使用者，回傳使用者資料
+}
