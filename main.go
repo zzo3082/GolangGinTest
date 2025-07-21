@@ -3,6 +3,7 @@ package main
 import (
 	"GolangAPI/database"
 	. "GolangAPI/handler"
+	"GolangAPI/middlewares"
 	"io"
 	"os"
 
@@ -23,7 +24,9 @@ func main() {
 
 	// Create a new Gin router instance
 	router := gin.Default()
-
+	// 這邊去讀 middleware 的 log 格式, 也可以加入簡單的auth驗證
+	//router.Use(gin.BasicAuth(gin.Accounts{"Tom": "123456"}), middlewares.Logger())
+	router.Use(middlewares.Logger())
 	// 1. Simple Get/Post
 	// Define a simple GET endpoint
 	router.GET("/ping", func(c *gin.Context) {
