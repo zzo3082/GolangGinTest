@@ -3,11 +3,24 @@ package main
 import (
 	"GolangAPI/database"
 	. "GolangAPI/handler"
+	"io"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
+// log設置
+func setupLogger() {
+	// os.Create 回回傳一個檔案
+	f, _ := os.Create("gin.log")
+	// gin.DefaultWriter 是 gin 的日誌輸出
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout) // 將日誌輸出到文件和控制台
+}
+
 func main() {
+	// 設置日誌輸出
+	setupLogger()
+
 	// Create a new Gin router instance
 	router := gin.Default()
 
