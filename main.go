@@ -4,6 +4,7 @@ import (
 	"GolangAPI/database"
 	. "GolangAPI/handler"
 	"GolangAPI/middlewares"
+	model "GolangAPI/models"
 	"io"
 	"os"
 
@@ -30,6 +31,8 @@ func main() {
 	// 註冊自定義驗證規則
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("ZzoUserPasd", middlewares.UserPasd) // 註冊自定義驗證規則
+		// StructLevel 的驗證, 給方法要是validator.StructLevel, 後面給 model
+		v.RegisterStructValidation(middlewares.CkeckUserList, model.Users{}) // 註冊結構體驗證
 	}
 
 	// 這邊去讀 middleware 的 log 格式, 也可以加入簡單的auth驗證

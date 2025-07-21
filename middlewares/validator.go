@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	model "GolangAPI/models"
 	"regexp"
 	"unicode"
 
@@ -30,4 +31,15 @@ func UserPasd(field validator.FieldLevel) bool {
 	}
 
 	return hasLetter && hasDigit
+}
+
+func CkeckUserList(field validator.StructLevel) {
+	users := field.Current().Interface().(model.Users)
+	if users.Count != len(users.UserList) {
+		field.ReportError(users.Count,
+			"Count of user list",
+			"Count",
+			"UsersCount",
+			"CkeckUserListCountFailed")
+	}
 }

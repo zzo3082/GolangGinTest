@@ -67,6 +67,26 @@ func PostUser(c *gin.Context) {
 	c.JSON(http.StatusOK, insertedUser)
 }
 
+// Post Multiple Users
+func PostUsers(c *gin.Context) {
+	users := model.Users{}
+
+	// 用 binging 屬性來驗證輸入, 在main註冊後, 可加入字定義的 middleware
+	err := c.BindJSON(&users)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "error : "+err.Error())
+		return
+	}
+	//err = repository.CreateUsers(users.UserList)      // 1. 直接DB.Create
+	//err = repository.CreateUsersBatch(users.UserList) // 2. 使用batch分批 Create
+	err = repository.CreateUsersBulk(users.UserList) // 3. 使用 SQL 指令批量插入
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, "message : PostUsers Successed.")
+}
+
 // Delete User
 func DeleteUser(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Param("id"))

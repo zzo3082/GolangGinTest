@@ -14,6 +14,7 @@ func AddUserRouter(router *gin.RouterGroup) {
 	user.GET("/", services.FindAllUsers)
 	user.GET("/:id", services.FindByUserId)
 	user.POST("/", services.PostUser)
+	user.POST("/batch", services.PostUsers) // 批量新增用戶
 	user.DELETE("/:id", services.DeleteUser)
 	user.PUT("/:id", services.PutUser)
 }
