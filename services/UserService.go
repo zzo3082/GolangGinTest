@@ -59,7 +59,11 @@ func PostUser(c *gin.Context) {
 	// 	}
 	// }
 
-	insertedUser := repository.CreateUser(user)
+	insertedUser, err := repository.CreateUser(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
+		return
+	}
 	c.JSON(http.StatusOK, insertedUser)
 }
 

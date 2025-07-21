@@ -20,9 +20,12 @@ func FindByUserId(id int) User {
 }
 
 // Post User
-func CreateUser(user User) User {
-	database.DBConn.Create(&user)
-	return user
+func CreateUser(user User) (User, error) {
+	result := database.DBConn.Create(&user)
+	if result.Error != nil {
+		return User{}, result.Error // 如果有錯誤，回傳空的 User 結構
+	}
+	return user, nil
 }
 
 // Delete User
