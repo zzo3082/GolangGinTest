@@ -63,6 +63,25 @@
 - `GET /v1/user/logout`     使用者登出（清除 session）
 - `GET /v1/user/check`      檢查使用者登入狀態（session 驗證）
 
+
+## 撈 Cache 資料流程
+
+### 流程1. redis內沒有資料
+
+1. API 請求進入 router，進到 `CacheOneUserDecorator` 方法
+2. `CacheOneUserDecorator` 檢查 `redis` 是否有對應資料
+3. `redis` 沒有資料時，呼叫 `RedisOneUser` 方法從 `DB` 撈資料，並將結果存入 `c *gin.Context`
+4. `CacheOneUserDecorator` 從 `RedisOneUser` 取得資料後，使用 `SETEX` 寫入 `redis`
+5. 回傳資料給前端
+
+### 流程2. redis內有資料
+
+1. API 請求進入 router，進到 `CacheOneUserDecorator` 方法
+2. `CacheOneUserDecorator` 檢查 `redis` 是否有對應資料
+3. `redis` 有資料，直接回傳快取內容
+
+
+
 ## 批量 insert db
 在 `UserRepository.go` 內有兩種方法
 1. `CreateUsersBatch` > 使用 `gorm` 內建的 Create + batch
