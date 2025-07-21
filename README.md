@@ -46,12 +46,15 @@
 
 ## API 路由
 
-- `GET /v1/user/`         取得所有使用者
-- `GET /v1/user/:id`      取得指定使用者
-- `POST /v1/user/`        新增使用者
-- `POST /v1/user/batch`   批量新增使用者
-- `DELETE /v1/user/:id`   刪除使用者
-- `PUT /v1/user/:id`      更新使用者
+- `GET /v1/user/`           取得所有使用者
+- `GET /v1/user/:id`        取得指定使用者
+- `POST /v1/user/`          新增使用者
+- `POST /v1/user/batch`     批量新增使用者
+- `DELETE /v1/user/:id`     刪除使用者
+- `PUT /v1/user/:id`        更新使用者
+- `POST /v1/user/login`     使用者登入（取得 session）
+- `GET /v1/user/logout`     使用者登出（清除 session）
+- `GET /v1/user/check`      檢查使用者登入狀態（session 驗證）
 
 ## 批量 insert db
 在 `UserRepository.go` 內有兩種方法
