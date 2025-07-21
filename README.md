@@ -1,6 +1,17 @@
+
 # GolangGinTest
 
-本專案是一個使用 Gin 框架與 GORM ORM 的 RESTful API 範例，主要提供 User 資料的 CRUD 操作，並連接 MySQL 資料庫。
+本專案是一個以 Gin 框架與 GORM ORM 為基礎的 RESTful API 範例，
+主要功能包含：
+
+- User 資料 CRUD 操作
+- MySQL 資料庫連線
+- Redis 快取（Cache）與連線池管理
+- Session 管理（登入、登出、驗證）
+- 請求日誌（log）中介層
+- 自訂驗證規則（validator）
+
+專案結構清晰，適合學習與實作中小型後端 API 專案。
 
 ## 資料夾結構
 
@@ -11,25 +22,29 @@
 ├── go.sum                   # 依賴管理
 ├── gin.log                  # Gin 日誌檔案
 ├── database/
-│   └── DBConnect.go         # 資料庫連線初始化
+│   ├── DBConnect.go         # 資料庫連線初始化
+│   └── Redis.go             # Redis 連線池初始化
 ├── handler/
 │   ├── SimpleRouter.go      # 範例路由
 │   └── UserRouter.go        # User 路由
 ├── middlewares/
 │   ├── Logger.go            # 請求日誌中介層
 │   ├── session.go           # Session 管理
-│   └── validator.go         # 自訂驗證規則
+│   ├── validator.go         # 自訂驗證規則
+│   └── CacheRedis.go        # Redis 快取裝飾器
 ├── migrations/
 │   └── users.sql            # 資料庫 migration SQL
 ├── models/
 │   ├── User.go              # User 資料模型
-│   └── LoginInfoDto.go      # 登入資訊 DTO
+│   ├── LoginInfoDto.go      # 登入資訊 DTO
+│   └── 其他 DTO 檔案         # 其他資料傳輸物件
 ├── repository/
 │   └── UserRepository.go    # User 資料庫操作
 ├── services/
 │   ├── SimpleService.go     # 範例服務
 │   ├── UserService.go       # User 業務邏輯
-│   └── AuthService.go       # 認證服務
+│   ├── AuthService.go       # 認證服務
+│   └── CacheRedis.go        # Redis 快取服務
 ```
 
 ## 快速開始
