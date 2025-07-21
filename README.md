@@ -43,8 +43,7 @@
 ├── services/
 │   ├── SimpleService.go     # 範例服務
 │   ├── UserService.go       # User 業務邏輯
-│   ├── AuthService.go       # 認證服務
-│   └── CacheRedis.go        # Redis 快取服務
+│   └── AuthService.go       # 認證服務
 ```
 
 ## 快速開始
