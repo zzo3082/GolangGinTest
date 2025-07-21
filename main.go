@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // log設置
@@ -24,9 +26,16 @@ func main() {
 
 	// Create a new Gin router instance
 	router := gin.Default()
+
+	// 註冊自定義驗證規則
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("ZzoUserPasd", middlewares.UserPasd) // 註冊自定義驗證規則
+	}
+
 	// 這邊去讀 middleware 的 log 格式, 也可以加入簡單的auth驗證
 	//router.Use(gin.BasicAuth(gin.Accounts{"Tom": "123456"}), middlewares.Logger())
-	router.Use(middlewares.Logger())
+	router.Use(gin.Recovery(), middlewares.Logger())
+
 	// 1. Simple Get/Post
 	// Define a simple GET endpoint
 	router.GET("/ping", func(c *gin.Context) {

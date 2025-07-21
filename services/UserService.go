@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 // 寫 User 邏輯操作的檔案, 驗證輸入 回傳
@@ -39,6 +38,7 @@ func FindByUserId(c *gin.Context) {
 func PostUser(c *gin.Context) {
 	user := model.User{}
 
+	// 用 binging 屬性來驗證輸入, 在main註冊後, 可加入字定義的 middleware
 	// c.BINDJSON 只有判斷屬性是否有對應 , 沒有判斷屬性 required
 	// ex : UserId是int, 如果輸入string, 會加入err
 	err := c.BindJSON(&user)
@@ -47,16 +47,17 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
+	// model改用binding tag, 這邊就不用再用 validator 驗證了
 	// 用套件 github.com/go-playground/validator/v10
 	// 來驗證User的validate:"required"屬性
-	validate := validator.New()
-	err = validate.Struct(user)
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			c.JSON(http.StatusBadRequest, "error : "+err.Namespace()+" "+err.Tag()+" "+err.Param())
-			return
-		}
-	}
+	// validate := validator.New()
+	// err = validate.Struct(user)
+	// if err != nil {
+	// 	for _, err := range err.(validator.ValidationErrors) {
+	// 		c.JSON(http.StatusBadRequest, "error : "+err.Namespace()+" "+err.Tag()+" "+err.Param())
+	// 		return
+	// 	}
+	// }
 
 	insertedUser := repository.CreateUser(user)
 	c.JSON(http.StatusOK, insertedUser)
