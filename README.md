@@ -9,20 +9,27 @@
 ├── main.go                  # 入口主程式
 ├── go.mod                   # Go module 設定
 ├── go.sum                   # 依賴管理
+├── gin.log                  # Gin 日誌檔案
 ├── database/
 │   └── DBConnect.go         # 資料庫連線初始化
 ├── handler/
 │   ├── SimpleRouter.go      # 範例路由
 │   └── UserRouter.go        # User 路由
+├── middlewares/
+│   ├── Logger.go            # 請求日誌中介層
+│   ├── session.go           # Session 管理
+│   └── validator.go         # 自訂驗證規則
 ├── migrations/
 │   └── users.sql            # 資料庫 migration SQL
 ├── models/
-│   └── User.go              # User 資料模型
+│   ├── User.go              # User 資料模型
+│   └── LoginInfoDto.go      # 登入資訊 DTO
 ├── repository/
 │   └── UserRepository.go    # User 資料庫操作
 ├── services/
 │   ├── SimpleService.go     # 範例服務
-│   └── UserService.go       # User 業務邏輯
+│   ├── UserService.go       # User 業務邏輯
+│   └── AuthService.go       # 認證服務
 ```
 
 ## 快速開始
