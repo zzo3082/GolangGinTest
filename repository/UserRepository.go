@@ -3,11 +3,7 @@ package Repository
 import (
 	"GolangAPI/database"
 	. "GolangAPI/models"
-	model "GolangAPI/models"
-	"net/http"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 // 這個檔案處理 User 資料庫CRUD操作
@@ -116,18 +112,4 @@ func CheckUserPassword(username, password string) (User, error) {
 		return User{}, err // 如果找不到使用者，回傳錯誤
 	}
 	return user, nil // 找到使用者，回傳使用者資料
-}
-
-// 從db撈出一個User, 並將結果寫入 gin.Context
-// 要給 CacheOneUserDecorator 方法用的
-// 第一次因為 Redis 沒有資料, 會呼叫這個方法
-func RedisOneUser(c *gin.Context) {
-	id := c.Param("id")
-	if id == "0" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-	user := model.User{}
-	database.DBConn.Where("id = ?", id).First(&user)
-	c.Set("dbResult", user)
 }

@@ -31,4 +31,15 @@ func AddUserRouter(router *gin.RouterGroup) {
 		user.GET("/logout", services.LogOut)          // 登出用戶
 		user.GET("/check", services.CheckUserSession) // 檢查使用者登入狀態
 	}
+
+}
+
+func AddMongoUserRouter(router *gin.RouterGroup) {
+	// mongo User CRUD
+	mongoUser := router.Group("/mongoUser")
+	mongoUser.GET("/", services.MongoFindUsers)
+	mongoUser.GET("/:id", services.MongoFindUserById)
+	mongoUser.POST("/", services.MongoCresteUser)
+	mongoUser.PUT("/", services.MongoUpdateUser)
+	mongoUser.DELETE("/:id", services.MongoDeleteUser)
 }

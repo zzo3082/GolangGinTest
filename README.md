@@ -1,11 +1,12 @@
 
 # GolangGinTest
 
-本專案是一個以 Gin 框架與 GORM ORM 為基礎的 RESTful API 範例，
+本專案是一個以 Gin 框架為基礎，結合 GORM ORM 與 MongoDB 的 RESTful API 範例，
 主要功能包含：
 
-- User 資料 CRUD 操作
+- User 資料 CRUD 操作（支援 MySQL 與 MongoDB）
 - MySQL 資料庫連線
+- MongoDB 連線與操作
 - Redis 快取（Cache）與連線池管理
 - Session 管理（登入、登出、驗證）
 - 請求日誌（log）中介層
@@ -17,33 +18,37 @@
 
 ```
 .
-├── main.go                  # 入口主程式
-├── go.mod                   # Go module 設定
-├── go.sum                   # 依賴管理
-├── gin.log                  # Gin 日誌檔案
+├── main.go                      # 入口主程式
+├── go.mod                       # Go module 設定
+├── go.sum                       # 依賴管理
+├── gin.log                      # Gin 日誌檔案
 ├── database/
-│   ├── DBConnect.go         # 資料庫連線初始化
-│   └── Redis.go             # Redis 連線池初始化
+│   ├── DBConnect.go             # MySQL 連線初始化
+│   ├── MongoDBConnect.go        # MongoDB 連線初始化
+│   └── Redis.go                 # Redis 連線池初始化
 ├── handler/
-│   ├── SimpleRouter.go      # 範例路由
-│   └── UserRouter.go        # User 路由
+│   ├── SimpleRouter.go          # 範例路由
+│   └── UserRouter.go            # User 路由
 ├── middlewares/
-│   ├── Logger.go            # 請求日誌中介層
-│   ├── session.go           # Session 管理
-│   ├── validator.go         # 自訂驗證規則
-│   └── CacheRedis.go        # Redis 快取裝飾器
+│   ├── Logger.go                # 請求日誌中介層
+│   ├── session.go               # Session 管理
+│   ├── validator.go             # 自訂驗證規則
+│   └── CacheRedis.go            # Redis 快取裝飾器
 ├── migrations/
-│   └── users.sql            # 資料庫 migration SQL
+│   └── users.sql                # 資料庫 migration SQL
 ├── models/
-│   ├── User.go              # User 資料模型
-│   ├── LoginInfoDto.go      # 登入資訊 DTO
-│   └── 其他 DTO 檔案         # 其他資料傳輸物件
+│   ├── User.go                  # User 資料模型
+│   ├── LoginInfoDto.go          # 登入資訊 DTO
+│   └── 其他 DTO 檔案             # 其他資料傳輸物件
 ├── repository/
-│   └── UserRepository.go    # User 資料庫操作
+│   ├── UserRepository.go        # User 資料庫操作（MySQL）
+│   ├── UserMongoRepository.go   # User 資料庫操作（MongoDB）
+│   └── UserRedisRepository.go   # User Redis 操作
 ├── services/
-│   ├── SimpleService.go     # 範例服務
-│   ├── UserService.go       # User 業務邏輯
-│   └── AuthService.go       # 認證服務
+│   ├── SimpleService.go         # 範例服務
+│   ├── UserService.go           # User 業務邏輯（MySQL）
+│   ├── UserMongoService.go      # User 業務邏輯（MongoDB）
+│   └── AuthService.go           # 認證服務
 ```
 
 ## 快速開始
@@ -65,17 +70,24 @@
    ```
    - 預設監聽在 `http://localhost:8080`
 
+
 ## API 路由
 
-- `GET /v1/user/`           取得所有使用者
-- `GET /v1/user/:id`        取得指定使用者
-- `POST /v1/user/`          新增使用者
-- `POST /v1/user/batch`     批量新增使用者
-- `DELETE /v1/user/:id`     刪除使用者
-- `PUT /v1/user/:id`        更新使用者
-- `POST /v1/user/login`     使用者登入（取得 session）
-- `GET /v1/user/logout`     使用者登出（清除 session）
-- `GET /v1/user/check`      檢查使用者登入狀態（session 驗證）
+- `GET /v1/user/`               取得所有使用者（MySQL）
+- `GET /v1/user/:id`            取得指定使用者（MySQL）
+- `POST /v1/user/`              新增使用者（MySQL）
+- `POST /v1/user/batch`         批量新增使用者（MySQL）
+- `DELETE /v1/user/:id`         刪除使用者（MySQL）
+- `PUT /v1/user/:id`            更新使用者（MySQL）
+- `POST /v1/user/login`         使用者登入（取得 session）
+- `GET /v1/user/logout`         使用者登出（清除 session）
+- `GET /v1/user/check`          檢查使用者登入狀態（session 驗證）
+
+- `GET /v1/mongo/user/`         取得所有使用者（MongoDB）
+- `GET /v1/mongo/user/:id`      取得指定使用者（MongoDB）
+- `POST /v1/mongo/user/`        新增使用者（MongoDB）
+- `DELETE /v1/mongo/user/:id`   刪除使用者（MongoDB）
+- `PUT /v1/mongo/user/:id`      更新使用者（MongoDB）
 
 
 ## 撈 Cache 資料流程

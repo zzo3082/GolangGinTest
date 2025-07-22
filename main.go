@@ -64,9 +64,13 @@ func main() {
 	// 3. Simple Router
 	AddSimpleRouter(v1)
 
+	// 5. Mongo User Router
+	AddMongoUserRouter(v1)
+
 	// 4. 連資料庫
 	go func() {
 		database.DBConnect()
+		database.MongoDBConnect()
 	}()
 
 	router.Run(":8080") // Start the server on port 8080
