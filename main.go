@@ -67,6 +67,9 @@ func main() {
 	// 5. Mongo User Router
 	AddMongoUserRouter(v1)
 
+	// 6. Coupon Router
+	AddCouponRouter(v1)
+
 	// 4. 連資料庫
 	go func() {
 		database.DBConnect()

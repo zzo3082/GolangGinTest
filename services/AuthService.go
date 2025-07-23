@@ -2,7 +2,7 @@ package services
 
 import (
 	"GolangAPI/middlewares"
-	model "GolangAPI/models"
+	apimodel "GolangAPI/models/ApiModels"
 	repository "GolangAPI/repository"
 	"net/http"
 
@@ -14,7 +14,7 @@ func Login(c *gin.Context) {
 	// 用 form 表單傳入資訊
 	// name := c.PostForm("name")
 	// password := c.PostForm("password")
-	var loginInfo model.LoginInfoDto
+	var loginInfo apimodel.LoginInfoDto
 	err := c.BindJSON(&loginInfo)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "error : "+err.Error())
