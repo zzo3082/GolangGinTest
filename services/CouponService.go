@@ -1,7 +1,9 @@
 package services
 
 import (
+	"GolangAPI/middlewares"
 	model "GolangAPI/models"
+	apiModel "GolangAPI/models/ApiModels"
 	repository "GolangAPI/repository"
 	"net/http"
 	"time"
@@ -33,24 +35,48 @@ func CreateCoupon(c *gin.Context) {
 
 }
 
-// func ClaimCoupon(c *gin.Context) {
-// 	claimCouponReq := apiModel.ClaimCouponRequestDto{}
-// 	err := c.Bind(&claimCouponReq)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, "錯誤的輸入.")
-// 		return
-// 	}
+func ClaimCoupon(c *gin.Context) {
+	claimCouponReq := apiModel.ClaimCouponRequestDto{}
+	err := c.Bind(&claimCouponReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "錯誤的輸入.")
+		return
+	}
 
-// 	// 找看看coupon
-// 	coupon, err := repository.GetCoupon(claimCouponReq.CouponCode)
-// 	if err != nil {
-// 		c.JSON(http.StatusNotFound, err.Error())
-// 	}
+	// 找看看coupon
+	coupon, err := repository.GetCoupon(claimCouponReq.CouponCode)
+	if err != nil {
+		c.JSON(http.StatusNotFound, err.Error())
+	}
 
-// 	// 確認日期
-// 	now := time.Now()
-// 	if now.Before(coupon.StartDate) || now.After(coupon.EndDate) {
-// 		c.JSON(http.StatusBadRequest, "error : 現在不是優惠券的使用期間.")
-// 	}
+	// 確認日期
+	now := time.Now()
+	if now.Before(coupon.StartDate) || now.After(coupon.EndDate) {
+		c.JSON(http.StatusBadRequest, "error : 現在不是優惠券的使用期間.")
+	}
 
-// }
+	// 確認 currentUses
+	if coupon.CurrentUses >= coupon.MaxUses {
+		c.JSON(http.StatusBadRequest, "error : 優惠券發放數量已達上限.")
+		return
+	}
+
+	// 更新 Coupon current_uses, updateAt
+	err = repository.UpdateCouponAfterClaimed(coupon)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "error : UpdateCouponAfterClaimed 失敗.")
+		return
+	}
+
+	userId := middlewares.GetSessionUserId(c)
+
+	// 新增 user coupon 紀錄
+	err = repository.CreateUserCoupon(userId, int(coupon.ID))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "error : CreateUserCoupon 失敗.")
+		return
+	}
+
+	c.JSON(http.StatusOK, "message : ClaimCoupon 成功.")
+
+}
