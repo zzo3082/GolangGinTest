@@ -3,7 +3,10 @@ package Repository
 import (
 	"GolangAPI/database"
 	. "GolangAPI/models"
+	"fmt"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // 這個檔案處理 User 資料庫CRUD操作
@@ -30,7 +33,7 @@ func CreateUser(user User) (User, error) {
 }
 
 // Insert Multiple Users
-func CreateUsers(users []User) error {
+func CreateUsers(users []*User) error {
 	result := database.DBConn.Create(&users)
 	if result.Error != nil {
 		return result.Error // 如果有錯誤，回傳錯誤
@@ -106,10 +109,20 @@ func CreateUsersTransaction(users []User) error {
 
 // CheckUserPassword
 func CheckUserPassword(username, password string) (User, error) {
-	var user User
-	err := database.DBConn.Where("name = ? AND password = ?", username, password).First(&user).Error
+	var users []User
+	err := database.DBConn.Where("name = ?", username).Find(&users).Error
 	if err != nil {
 		return User{}, err // 如果找不到使用者，回傳錯誤
 	}
-	return user, nil // 找到使用者，回傳使用者資料
+	if len(users) == 0 {
+		return User{}, fmt.Errorf("invalid name") // 如果找不到使用者，回傳錯誤
+	}
+	for _, user := range users {
+		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+		if err == nil {
+			return user, nil // 找到name跟密碼對應的用戶回傳
+		}
+	}
+
+	return User{}, fmt.Errorf("invalid password") // 如果找不到使用者，回傳錯誤
 }

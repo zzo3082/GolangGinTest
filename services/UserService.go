@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // 寫 User 邏輯操作的檔案, 驗證輸入 回傳
@@ -47,18 +48,12 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	// model改用binding tag, 這邊就不用再用 validator 驗證了
-	// 用套件 github.com/go-playground/validator/v10
-	// 來驗證User的validate:"required"屬性
-	// validate := validator.New()
-	// err = validate.Struct(user)
-	// if err != nil {
-	// 	for _, err := range err.(validator.ValidationErrors) {
-	// 		c.JSON(http.StatusBadRequest, "error : "+err.Namespace()+" "+err.Tag()+" "+err.Param())
-	// 		return
-	// 	}
-	// }
-
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
+		return
+	}
+	user.Password = string(hashedPassword)
 	insertedUser, err := repository.CreateUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
@@ -77,9 +72,20 @@ func PostUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "error : "+err.Error())
 		return
 	}
-	//err = repository.CreateUsers(users.UserList)      // 1. 直接DB.Create
+
+	// 把userList的密碼加密
+	for _, user := range users.UserList {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, "error : "+err.Error())
+			return
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	err = repository.CreateUsers(users.UserList) // 1. 直接DB.Create
 	//err = repository.CreateUsersBatch(users.UserList) // 2. 使用batch分批 Create
-	err = repository.CreateUsersBulk(users.UserList) // 3. 使用 SQL 指令批量插入
+	// err = repository.CreateUsersBulk(users.UserList) // 3. 使用 SQL 指令批量插入
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
 		return

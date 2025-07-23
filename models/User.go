@@ -17,6 +17,7 @@ type User struct {
 }
 
 type Users struct {
-	UserList []User `json:"Users" binding:"required,gt=0,lt=30"` // gt=0 是大於0個元素, lt=30 是小於30個元素
-	Count    int    `json:"UsersCount"`
+	// 加 * 改成指針切片, 這樣在 for 內改變 user.Password 之類的屬性, 才可以變更值
+	UserList []*User `json:"Users" binding:"required,gt=0,lt=30"` // gt=0 是大於0個元素, lt=30 是小於30個元素
+	Count    int     `json:"UsersCount"`
 }
