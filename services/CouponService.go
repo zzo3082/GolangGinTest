@@ -28,6 +28,13 @@ func CreateCoupon(c *gin.Context) {
 		return
 	}
 
+	// 其他service檔案的方法, 可以直接使用
+	err = CreateRedisCoupon(coupon)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Create Coupon Done!",
 		"Coupon":  coupon,
@@ -42,8 +49,13 @@ func ClaimCoupon(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "錯誤的輸入."})
 		return
 	}
-
-	// 找看看coupon
+	// 1. 去 redis 判斷這個 coupon 的 current_uses/max_uses 是否達到上限了
+	err = CheckAddCache(claimCouponReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	// 2. 去db找看看coupon (可能可以把coupon都改到redis)
 	coupon, err := repository.GetCoupon(claimCouponReq.CouponCode)
 	if err != nil {
 		c.JSON(http.StatusNotFound, err.Error())

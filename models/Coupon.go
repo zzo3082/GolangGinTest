@@ -14,5 +14,5 @@ type Coupon struct {
 	EndDate       time.Time `json:"end_date"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"update_at"`
-	IsDeleted     bool      `json:"isdeleted"`
+	Isdeleted     bool      `json:"isdeleted"` // 這邊bool 對應到 mysql 是 tinyint(1)
 }
