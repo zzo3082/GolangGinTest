@@ -3,8 +3,11 @@ package Repository
 import (
 	"GolangAPI/database"
 	. "GolangAPI/models"
+	"GolangAPI/models/enums"
 	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Create Coupon
@@ -27,27 +30,44 @@ func GetCoupon(code string) (Coupon, error) {
 }
 
 // 拿取優惠券後更新 coupon
-func UpdateCouponAfterClaimed(coupon Coupon) error {
+func UpdateCouponAfterClaimed(tx *gorm.DB, coupon Coupon) error {
 	coupon.UpdatedAt = time.Now()
 	coupon.CurrentUses++
 
-	result := database.DBConn.Model(&coupon).Where("id = ?", coupon.ID).Updates(coupon)
+	result := tx.Model(&coupon).Where("id = ?", coupon.ID).Updates(coupon)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func CreateUserCoupon(userid int, couponid int) error {
+func CreateUserCoupon(tx *gorm.DB, userid int, couponid int) error {
 	userCoupons := UserCoupon{
 		UserID:    int64(userid),
 		CouponID:  int64(couponid),
-		Status:    "UNUSED",
+		Status:    enums.String(enums.UNUSED),
 		ClaimedAt: time.Now(),
 	}
-	result := database.DBConn.Create(userCoupons)
+	result := tx.Create(userCoupons)
 	if result.Error != nil {
 		return result.Error
 	}
 	return nil
+}
+
+func ClaimCouponTransaction(userid int, coupon Coupon) error {
+	// 把 UpdateCouponAfterClaimed 跟 CreateUserCoupon 包在 Transaction 內
+	// 兩個都成功可以更新到 db
+	return database.DBConn.Transaction(func(tx *gorm.DB) error {
+		// 這邊開始 Transaction
+		if err := UpdateCouponAfterClaimed(tx, coupon); err != nil {
+			return err
+		}
+
+		if err := CreateUserCoupon(tx, userid, int(coupon.ID)); err != nil {
+			return err
+		}
+		return nil
+		// Transaction 結束, 沒有 err 回傳 nil
+	})
 }
