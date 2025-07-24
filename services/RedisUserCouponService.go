@@ -32,8 +32,9 @@ func CreateRedisCoupon(coupon Coupon) error {
 
 // 測試拿 redis 內的值
 func GetKey() {
-	conn := database.RedisDefaultPool.Get()
-	data, err := redis.Values(conn.Do("HGETALL", "coupon:Test004"))
+	redisConn := database.RedisDefaultPool.Get()
+	defer redisConn.Close()
+	data, err := redis.Values(redisConn.Do("HGETALL", "coupon:Test004"))
 	if err != nil {
 		fmt.Println("Get Key FAILED:", err)
 		return
@@ -98,6 +99,19 @@ func CheckAddCache(claimCouponReq ClaimCouponRequestDto) error {
 		}
 	case 0:
 		return fmt.Errorf("優惠券發放數量已達上限")
+	}
+	return nil
+}
+
+// cliam操作錯誤 rollback cache 的 current_uses
+func RollbackCouponUsesCache(code string) error {
+	redisConn := database.RedisDefaultPool.Get()
+	defer redisConn.Close()
+
+	redisKey := fmt.Sprintf("coupon:%s", code)
+	_, err := redisConn.Do("HINCRBY", redisKey, "current_uses", -1)
+	if err != nil {
+		return err
 	}
 	return nil
 }

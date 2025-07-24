@@ -53,12 +53,14 @@ func ClaimCoupon(c *gin.Context) {
 	err = CheckAddCache(claimCouponReq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		RollbackCouponUsesCache(claimCouponReq.CouponCode)
 		return
 	}
 	// 2. 去db找看看coupon (可能可以把coupon都改到redis)
 	coupon, err := repository.GetCoupon(claimCouponReq.CouponCode)
 	if err != nil {
 		c.JSON(http.StatusNotFound, err.Error())
+		RollbackCouponUsesCache(claimCouponReq.CouponCode)
 		return
 	}
 
@@ -66,12 +68,14 @@ func ClaimCoupon(c *gin.Context) {
 	now := time.Now()
 	if now.Before(coupon.StartDate) || now.After(coupon.EndDate) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "現在不是優惠券的使用期間."})
+		RollbackCouponUsesCache(claimCouponReq.CouponCode)
 		return
 	}
 
 	// 確認 currentUses
 	if coupon.CurrentUses >= coupon.MaxUses {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "優惠券發放數量已達上限."})
+		RollbackCouponUsesCache(claimCouponReq.CouponCode)
 		return
 	}
 
@@ -84,6 +88,7 @@ func ClaimCoupon(c *gin.Context) {
 			"error":        "ClaimCouponTransaction 失敗",
 			"errorMessage": err.Error(),
 		})
+		RollbackCouponUsesCache(claimCouponReq.CouponCode)
 		return
 	}
 
