@@ -52,8 +52,8 @@ func ClaimCoupon(c *gin.Context) {
 	// 1. 去 redis 判斷這個 coupon 的 current_uses/max_uses 是否達到上限了
 	err = CheckAddCache(claimCouponReq)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
-		RollbackCouponUsesCache(claimCouponReq.CouponCode)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// 這邊不能rollback
 		return
 	}
 	// 2. 去db找看看coupon (可能可以把coupon都改到redis)

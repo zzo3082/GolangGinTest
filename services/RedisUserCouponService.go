@@ -53,10 +53,10 @@ func GetKey() {
 
 // 檢查 current_uses 是否達到上限
 func CheckAddCache(claimCouponReq ClaimCouponRequestDto) error {
-	// 使用 Redis 檢查 current_uses
 	redisConn := database.RedisDefaultPool.Get()
 	defer redisConn.Close()
 	redisKey := fmt.Sprintf("coupon:%s", claimCouponReq.CouponCode)
+	lockKey := fmt.Sprintf("lock:coupon:%s", claimCouponReq.CouponCode)
 
 	// Lua 腳本：檢查並增加 current_uses
 	luaScript := `
@@ -64,7 +64,7 @@ func CheckAddCache(claimCouponReq ClaimCouponRequestDto) error {
         if #data == 0 then
             return -1  -- Redis 中無此優惠券
         end
-        local current = tonumber(data[2])  -- current_uses HSET時決定的順序 2是current_uses的值
+        local current = tonumber(data[2])  -- current_uses
         local max = tonumber(data[4])      -- max_uses
         if current >= max then
             return 0  -- 超過上限
@@ -72,27 +72,57 @@ func CheckAddCache(claimCouponReq ClaimCouponRequestDto) error {
         redis.call('HINCRBY', KEYS[1], 'current_uses', 1)
         return 1  -- 成功
     `
+
+	// 嘗試執行 Lua 腳本
 	result, err := redis.Int(redisConn.Do("EVAL", luaScript, 1, redisKey))
 	if err != nil {
 		return err
 	}
+
 	switch result {
 	case -1:
-		// Redis 中無數據，撈取資料庫
+		// 嘗試獲取分佈式鎖
+		locked, err := redisConn.Do("SET", lockKey, "locked", "EX", 15, "NX")
+		if err != nil {
+			return err
+		}
+		if locked == nil {
+			// 未獲得鎖，重試或返回錯誤
+			return fmt.Errorf("無法獲得鎖，請稍後重試")
+		}
+		defer redisConn.Do("DEL", lockKey) // 確保釋放鎖
+
+		// 再次檢查 Redis，防止其他執行緒已初始化
+		result, err = redis.Int(redisConn.Do("EVAL", luaScript, 1, redisKey))
+		if err != nil {
+			return err
+		}
+		if result != -1 {
+			// Redis 已初始化，直接返回結果
+			if result == 0 {
+				return fmt.Errorf("優惠券發放數量已達上限")
+			}
+			return nil
+		}
+
+		// Redis 仍無數據，從資料庫獲取
 		coupon, err := repository.GetCoupon(claimCouponReq.CouponCode)
 		if err != nil {
 			return err
 		}
+
 		// 初始化 Redis 數據
 		_, err = redisConn.Do("HSET", redisKey, "max_uses", coupon.MaxUses, "current_uses", coupon.CurrentUses)
 		if err != nil {
 			return fmt.Errorf("無法初始化 Redis 優惠券數據")
 		}
-		// 再次檢查（因為 current_uses 可能已從資料庫更新）
+
+		// 再次檢查
 		if coupon.CurrentUses >= coupon.MaxUses {
 			return fmt.Errorf("優惠券發放數量已達上限")
 		}
-		// 增加 Redis current_uses
+
+		// 增加 current_uses
 		_, err = redisConn.Do("HINCRBY", redisKey, "current_uses", 1)
 		if err != nil {
 			return fmt.Errorf("Redis更新失敗")
@@ -100,6 +130,7 @@ func CheckAddCache(claimCouponReq ClaimCouponRequestDto) error {
 	case 0:
 		return fmt.Errorf("優惠券發放數量已達上限")
 	}
+
 	return nil
 }
 
