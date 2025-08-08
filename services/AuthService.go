@@ -5,8 +5,11 @@ import (
 	apimodel "GolangAPI/models/ApiModels"
 	repository "GolangAPI/repository"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Login
@@ -29,10 +32,26 @@ func Login(c *gin.Context) {
 	// 登入成功後儲存 session
 	middlewares.SaveSession(c, user.ID)
 
+	// 生成jwt token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(time.Second * 60).Unix(),
+	})
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWTSecret")))
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"Message": "Login successful",
-		"User":    user,
-		"Session": middlewares.GetSessionUserId(c),
+		"Message":  "Login successful",
+		"User":     user,
+		"Session":  middlewares.GetSessionUserId(c),
+		"JWTToken": tokenString,
 	})
 }
 
@@ -53,5 +72,12 @@ func CheckUserSession(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"Message": "Login successful",
 		"Session": sessionId,
+	})
+}
+
+func ValidateJWT(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"Message": "JWT is valid.",
+		"User":    c.MustGet("user"),
 	})
 }

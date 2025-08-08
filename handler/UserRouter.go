@@ -1,6 +1,7 @@
 package src
 
 import (
+	"GolangAPI/middlewares"
 	redisCache "GolangAPI/middlewares"
 	sessions "GolangAPI/middlewares"
 	model "GolangAPI/models"
@@ -23,7 +24,8 @@ func AddUserRouter(router *gin.RouterGroup) {
 	user.POST("/batch", services.PostUsers) // 批量新增用戶
 	user.PUT("/:id", services.PutUser)
 
-	user.POST("/login", services.Login) // 登入用戶
+	user.POST("/login", services.Login)                                  // 登入用戶
+	user.GET("/validate", middlewares.RequireAuth, services.ValidateJWT) //驗證JWT
 
 	user.Use(sessions.AuthSession()) // 使用者登入後的驗證中間件
 	{
