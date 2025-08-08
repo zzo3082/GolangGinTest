@@ -19,7 +19,7 @@ func DBConnect() {
 	// 載入 .env 檔案
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file. If docker is fine.")
+		log.Println("Error loading .env file. If docker is fine.!!!!!!!!!!!!!!!!!!!!!!!!")
 	}
 	// 讀取環境變數
 	mysqlHost := os.Getenv("MYSQL_HOST")
