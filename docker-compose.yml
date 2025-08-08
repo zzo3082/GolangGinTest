@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8088:8080"  # 映射主機的 8080 埠到容器
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=zzo3082MysqlPwd
+      - MYSQL_DATABASE=golangdb
+      - MONGODB_URI=mongodb://mongo:27017/GolangMongoDb
+      - MONGODB_DATABASE=GolangMongoDb
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWTSecret=ZZO3082MERIKGMSLKFEPOWEKEF
+    depends_on:
+      - mysql
+      - mongo
+      - redis
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=zzo3082MysqlPwd
+      - MYSQL_DATABASE=golangdb
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql  # 自動匯入本地 MySQL 資料
+    ports:
+      - "3307:3306"  # 把3307映射到3306, 因為本機還在使用3306 可選：映射到主機以便本地工具連線
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=GolangMongoDb
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"  # 可選：映射到主機
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis-data:/data
+      - ./redis_data:/data  # 將本地的 Redis 資料複製到容器
+    ports:
+      - "6379:6379"  # 可選：映射到主機
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+  mongo-data:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -33,3 +33,9 @@ go.work.sum
 
 # Logs
 *.log
+
+# 給 docker 內 mysql 初始化的 sqli 檔案 通常不上 github
+# backup.sql 
+
+# 給 docker 內 redis 初始化的 Redis dump file
+*.rdb 

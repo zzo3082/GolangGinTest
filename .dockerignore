@@ -1,0 +1,44 @@
+# 忽略 Git 相關檔案
+.git
+.gitignore
+
+# 忽略本地開發環境的檔案
+.env
+*.log
+
+# 忽略 Go 編譯產生的臨時檔案
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+tmp/
+
+# 忽略 Go 模組快取
+vendor/
+
+# 忽略測試和臨時檔案
+*.test
+*.prof
+coverage.out
+
+# 忽略資料庫備份檔案（這些由 docker-compose volumes 處理）
+backup.sql
+mongo_backup/
+redis_data/
+
+# 忽略 Docker 相關檔案
+Dockerfile
+docker-compose.yml
+
+# 忽略 IDE 或編輯器配置
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 忽略其他不必要的檔案
+node_modules/
+dist/
+build/
