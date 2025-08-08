@@ -2,7 +2,7 @@
 # GolangGinTest
 
 本專案是一個以 Gin 框架為基礎，結合 GORM ORM、MongoDB 與 Redis 的 RESTful API 範例，
-涵蓋多種資料庫操作、快取、Session、驗證與日誌等功能，適合學習與實作中小型後端 API 專案。
+涵蓋多種資料庫操作、快取、Session、JWT、驗證與日誌等功能，適合學習與實作中小型後端 API 專案。
 
 **主要功能：**
 - User 資料 CRUD（支援 MySQL、MongoDB）
@@ -10,6 +10,7 @@
 - MySQL、MongoDB、Redis 連線與操作
 - Redis 快取（Cache）與連線池管理
 - Session 管理（登入、登出、驗證）
+- JWT 生成驗證 (生成JWT設Cookie)
 - 請求日誌（log）中介層
 - 自訂驗證規則（validator）
 
@@ -32,7 +33,8 @@
 │   ├── Logger.go                    # 請求日誌中介層
 │   ├── session.go                   # Session 管理
 │   ├── validator.go                 # 自訂驗證規則
-│   └── CacheRedis.go                # Redis 快取裝飾器
+│   ├── CacheRedis.go                # Redis 快取裝飾器
+│   └── JWTAuth.go                   # JWT 驗證
 ├── migrations/    
 │   └── users.sql                    # 資料庫 migration SQL
 ├── models/    
@@ -82,10 +84,11 @@
 - `DELETE /v1/user/:id`         刪除使用者
 - `PUT /v1/user/:id`            更新使用者
 
-### Session 與驗證
-- `POST /v1/user/login`         使用者登入（取得 session）
+### Session 與 JWT 驗證
+- `POST /v1/user/login`         使用者登入（取得 session, 生成 JWT）
 - `GET /v1/user/logout`         使用者登出（清除 session）
 - `GET /v1/user/check`          檢查使用者登入狀態（session 驗證）
+- `GET /v1/user/validate`       驗證JWT
 
 ### MongoDB 相關
 - `GET /v1/mongo/user/`         取得所有使用者
@@ -133,6 +136,17 @@
 4. **資料庫 Transaction**：執行 `ClaimCouponTransaction`，更新 MySQL 的 `coupon.current_uses` 並插入 `user_coupon` 記錄。
 5. **錯誤回滾**：若 MySQL 操作失敗，回滾 Redis 的 `current_uses`。
 6. **返回結果**：成功則返回領取成功，否則返回錯誤訊息。
+
+## JWT 與 Session 比較
+
+此表格比較了 **JWT（JSON Web Token）** 和 **Session（會話）** 在身份驗證和會話管理中的優缺點及適用場景。
+
+| **面向**             | **JWT**                                                                 | **Session**                                                             |
+|----------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| **定義**             | 一種無狀態的 token，包含用戶資料並使用簽名進行驗證。                    | 伺服器端會話管理，使用唯一的 Session ID 儲存在 Cookie 中。              |
+| **優點**             | - 無狀態：伺服器無需儲存會話資料，適合高擴展性應用。<br>- 跨域友好：適用於 API 和微服務架構。<br>- 自訂靈活：可包含用戶角色、權限等資訊。 | - 伺服器控制：可隨時作廢會話（如登出），安全性較高。<br>- 簡單實現：框架內建支援，適合傳統 Web 應用。<br>- 安全：Session ID 不含敏感資料。 |
+| **缺點**             | - 無法即時作廢：除非過期，伺服器無法主動撤銷 token（需黑名單機制）。<br>- 安全性風險：若儲存在 LocalStorage，易受 XSS 攻擊；若用 Cookie，需防 CSRF。<br>- Token 可能較大，增加請求負載。 | - 有狀態：需伺服器儲存會話資料（如 Redis），增加負擔。<br>- 跨域複雜：需要額外配置 CORS 和 Cookie 屬性。<br>- 擴展性挑戰：多伺服器需集中儲存或黏性會話。 |
+| **適用場景**         | - 單頁應用程式（SPA，如 React、Vue）。<br>- 行動應用程式。<br>- 微服務或跨域場景。<br>- 無狀態 API 架構。 | - 傳統伺服器渲染 Web 應用（如 Gin、Rails）。<br>- 高安全性需求（如銀行系統）。<br>- 需頻繁更新會話資料（如購物車）。 |
 ---
 
 如需更多說明請參考各資料夾內程式碼。
