@@ -24,13 +24,9 @@ vendor/
 coverage.out
 
 # 忽略資料庫備份檔案（這些由 docker-compose volumes 處理）
-backup.sql
-mongo_backup/
-redis_data/
-
-# 忽略 Docker 相關檔案
-Dockerfile
-docker-compose.yml
+# backup.sql
+# mongo_backup/
+# redis_data/
 
 # 忽略 IDE 或編輯器配置
 .idea/
