@@ -24,6 +24,10 @@
 ├── go.mod                           # Go module 設定
 ├── go.sum                           # 依賴管理
 ├── gin.log                          # Gin 日誌檔案
+├── dockerfile                       # 容器藍圖，定義建置 Go 應用程式映像檔
+├── docker-compose.yml               # 設定應用程式、資料庫等的啟動方式和網路
+├── backup.sql                       # 資料庫初始腳本，容器首次啟動時自動匯入
+├── .dockerignore                    # Docker 映像檔時要忽略的檔案或資料夾
 ├── database/    
 │   ├── DBConnect.go                 # MySQL 連線初始化
 │   ├── MongoDBConnect.go            # MongoDB 連線初始化
