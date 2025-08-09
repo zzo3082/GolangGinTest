@@ -4,7 +4,7 @@
 本專案是一個以 Gin 框架為基礎，結合 GORM ORM、MongoDB 與 Redis 的 RESTful API 範例，
 涵蓋多種資料庫操作、快取、Session、JWT、驗證與日誌等功能，適合學習與實作中小型後端 API 專案。
 
-此外，本專案支援 Docker 與 Docker Compose 進行容器化部署，簡化環境配置與服務管理。透過 Docker 映像檔（zzo3082/golanggintest:latest），使用者可快速拉取並運行應用程式；搭配 Docker Compose，輕鬆管理多容器環境，包括 API 服務與 MySQL 資料庫，確保跨平台一致性與高效部署。
+此外，本專案支援 Docker 與 Docker Compose 進行容器化部署，簡化環境配置與服務管理。透過 Docker 映像檔（zzo3082/golanggindemo:latest），使用者可快速拉取並運行應用程式；搭配 Docker Compose，輕鬆管理多容器環境，包括 API 服務與 MySQL 資料庫，確保跨平台一致性與高效部署。
 
 **主要功能：**
 - User 資料 CRUD（支援 MySQL、MongoDB）
