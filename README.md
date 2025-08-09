@@ -200,6 +200,26 @@
    ```
 
 ### 登入 mysql container
+`docker-compose.yml` 檔案已將 `MySQL` 容器的內部埠號 `3306` 映射到主機的 `3307` 埠號。因此，你可以使用任何本地的資料庫管理工具（如 DBeaver、HeidiSQL、MySQL Workbench 等）來連接它。
+```bash
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=zzo3082MysqlPwd
+      - MYSQL_DATABASE=golangdb
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql  # 自動匯入本地 MySQL 資料
+    ports:
+      - "3307:3306"  # 把3307映射到3306, 因為本機還在使用3306 可選：映射到主機以便本地工具連線
+    networks:
+      - app-network
+```
+資料庫連線資訊如下，與`docker-compose.yml`對應。
+* Host = localhost
+* Port = 3307
+* UserName = root
+* Password = zzo3082MysqlPwd
 
 ---
 
