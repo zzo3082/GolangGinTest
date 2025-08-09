@@ -2,6 +2,7 @@ package services
 
 import (
 	model "GolangAPI/models"
+	. "GolangAPI/models/ApiModels"
 	repository "GolangAPI/repository"
 	"net/http"
 	"strconv"
@@ -59,7 +60,7 @@ func PostUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, "error : "+err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, insertedUser)
+	c.JSON(http.StatusOK, NewUserResponse(insertedUser))
 }
 
 // Post Multiple Users

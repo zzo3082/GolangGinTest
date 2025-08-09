@@ -2,7 +2,8 @@ package services
 
 import (
 	"GolangAPI/middlewares"
-	apimodel "GolangAPI/models/ApiModels"
+	. "GolangAPI/models"
+	. "GolangAPI/models/ApiModels"
 	repository "GolangAPI/repository"
 	"net/http"
 	"os"
@@ -17,7 +18,7 @@ func Login(c *gin.Context) {
 	// 用 form 表單傳入資訊
 	// name := c.PostForm("name")
 	// password := c.PostForm("password")
-	var loginInfo apimodel.LoginInfoDto
+	var loginInfo LoginInfoDto
 	err := c.BindJSON(&loginInfo)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "error : "+err.Error())
@@ -49,7 +50,7 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"Message":  "Login successful",
-		"User":     user,
+		"User":     NewUserResponse(user),
 		"Session":  middlewares.GetSessionUserId(c),
 		"JWTToken": tokenString,
 	})
@@ -76,8 +77,9 @@ func CheckUserSession(c *gin.Context) {
 }
 
 func ValidateJWT(c *gin.Context) {
+	user := c.MustGet("user").(User)
 	c.JSON(http.StatusOK, gin.H{
 		"Message": "JWT is valid.",
-		"User":    c.MustGet("user"),
+		"User":    NewUserResponse(user),
 	})
 }
