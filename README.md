@@ -227,6 +227,22 @@
 * UserName = root
 * Password = zzo3082MysqlPwd
 
+### 更新與推送映像檔
+
+當你更新專案程式碼後，可以按照以下步驟重新構建並推送 Docker 映像檔：
+
+1. **構建映像檔**  
+   在專案根目錄（包含 `Dockerfile` 的目錄）執行以下命令，構建最新的 Docker 映像檔：
+   ```bash
+   docker build -t zzo3082/golanggindemo:latest .
+   ```
+
+2. **推送映像檔**  
+   構建完成後，將映像檔推送至 Docker Hub：
+   ```bash
+   docker push zzo3082/golanggindemo:latest
+   ```
+   * **註解** : `docker push` 不會把更新的程式重新`build` 映像檔出來, 要先`docker build -t <username/imagename:version> .` 建出新的映像檔.
 ---
 
 如需更多說明請參考各資料夾內程式碼。
