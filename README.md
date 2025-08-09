@@ -147,6 +147,60 @@
 | **優點**             | - 無狀態：伺服器無需儲存會話資料，適合高擴展性應用。<br>- 跨域友好：適用於 API 和微服務架構。<br>- 自訂靈活：可包含用戶角色、權限等資訊。 | - 伺服器控制：可隨時作廢會話（如登出），安全性較高。<br>- 簡單實現：框架內建支援，適合傳統 Web 應用。<br>- 安全：Session ID 不含敏感資料。 |
 | **缺點**             | - 無法即時作廢：除非過期，伺服器無法主動撤銷 token（需黑名單機制）。<br>- 安全性風險：若儲存在 LocalStorage，易受 XSS 攻擊；若用 Cookie，需防 CSRF。<br>- Token 可能較大，增加請求負載。 | - 有狀態：需伺服器儲存會話資料（如 Redis），增加負擔。<br>- 跨域複雜：需要額外配置 CORS 和 Cookie 屬性。<br>- 擴展性挑戰：多伺服器需集中儲存或黏性會話。 |
 | **適用場景**         | - 單頁應用程式（SPA，如 React、Vue）。<br>- 行動應用程式。<br>- 微服務或跨域場景。<br>- 無狀態 API 架構。 | - 傳統伺服器渲染 Web 應用（如 Gin、Rails）。<br>- 高安全性需求（如銀行系統）。<br>- 需頻繁更新會話資料（如購物車）。 |
+
+## Docker 使用筆記
+
+### 啟動專案
+
+1.  準備 `docker-compose.yml` 和 `backup.sql`, Redis 跟 Mongo 有初始化資料也要放進去。
+2.  在終端機中，回到專案根目錄，執行以下指令：
+
+    ```bash
+    docker-compose up -d
+    ```
+    * **註解：** `docker-compose up` 會自動下載映像檔、建立網路、啟動所有服務。  
+    `-d` 參數讓容器在背景運行。
+
+3.  確認容器是否正在運行：
+
+    ```bash
+    docker ps
+    ```
+
+### 重置資料庫
+
+如果你需要刪除舊的資料庫資料，並重新匯入 `backup.sql`，請遵循以下步驟：
+
+1.  停止並移除所有服務，包括相關的資料卷（volume）：
+
+    ```bash
+    docker-compose down -v
+    ```
+    * **註解：** 這個指令會一次性停止、刪除所有容器，並連同資料庫資料一起刪除，確保下次啟動時會重新初始化。
+
+2.  重新啟動專案：
+
+    ```bash
+    docker-compose up -d
+    ```
+    * **註解：** 這次啟動會建立新的 `volume`，並根據 `docker-compose.yml` 中的設定，自動匯入 `backup.sql` 中的資料。
+
+### docker 相關指令
+1. View `volume` List
+    ```bash
+    docker volume ls
+    ```
+2. Remove `volume` by (volume name)
+   ```bash
+   docker volume rm mysql-data
+   ```
+3. Remove `container` by (container Id)
+   ```bash
+   docker rm d9d3a9350f58 
+   ```
+
+### 登入 mysql container
+
 ---
 
 如需更多說明請參考各資料夾內程式碼。
